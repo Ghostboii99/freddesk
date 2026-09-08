@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freddesk"
+version = "1.0.0"
+description = "Cross-platform system health checks with Windows event-log triage and audit-ready reports."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Fred" }]
+keywords = ["helpdesk", "cybersecurity", "diagnostics", "windows", "python"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+freddesk = "freddesk.cli:main"
+
+[tool.setuptools]
+packages = ["freddesk"]
+
