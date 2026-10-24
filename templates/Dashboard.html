@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FredDesk OPS | Helpdesk Operations Center</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: #f9fafb;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 230px;
+            min-width: 230px;
+            min-height: 100vh;
+            background: #020617;
+            padding: 25px;
+        }
+
+        .sidebar h2 {
+            color: #38bdf8;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            margin: 18px 0;
+            transition: color 0.2s;
+        }
+
+        .sidebar a:hover {
+            color: #38bdf8;
+        }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+        }
+
+        .card {
+            background: #1f2937;
+            padding: 20px;
+            margin-bottom: 18px;
+            border-radius: 12px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .grid .card {
+            margin-bottom: 0;
+        }
+
+        .score {
+            font-size: 48px;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .metric {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .muted {
+            color: #94a3b8;
+        }
+
+        .section-title {
+            margin-top: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #374151;
+            text-align: left;
+        }
+
+        th {
+            color: #38bdf8;
+        }
+
+        .ticket {
+            background: #111827;
+            border: 1px solid #374151;
+            padding: 20px;
+            margin-bottom: 18px;
+            border-radius: 10px;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ticket-header h3 {
+            overflow-wrap: anywhere;
+        }
+
+        .ticket-id {
+            color: #38bdf8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .badge.open {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .badge.in-progress {
+            background: #78350f;
+            color: #fde68a;
+        }
+
+        .badge.resolved {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        .badge.closed {
+            background: #374151;
+            color: #e5e7eb;
+        }
+
+        .evidence {
+            background: #020617;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .evidence ul {
+            padding-left: 22px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            background: #020617;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            margin-top: 10px;
+        }
+
+        textarea:focus {
+            outline: 2px solid #38bdf8;
+            outline-offset: 2px;
+        }
+
+        button {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            background: #0369a1;
+        }
+
+        .refresh-button {
+            background: #374151;
+            margin-top: 0;
+        }
+
+        .refresh-button:hover {
+            background: #475569;
+        }
+
+        .resolution {
+            background: #064e3b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        .resolution p {
+            white-space: pre-wrap;
+        }
+
+        .flash {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .flash.success {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        .flash.error {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .ticket-details {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .ticket-details p {
+            margin: 8px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .empty-state {
+            color: #94a3b8;
+            padding: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: 0;
+                min-height: auto;
+            }
+
+            .main {
+                padding: 15px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <h2>FredDesk OPS</h2>
+
+        <a href="#dashboard">Dashboard</a>
+        <a href="#system-health">System Health</a>
+        <a href="#processes">Processes</a>
+        <a href="#windows-logs">Windows Logs</a>
+        <a href="#recommendations">Recommendations</a>
+        <a href="#incidents">Incidents / Tickets</a>
+
+    </aside>
+
+
+    <!-- MAIN DASHBOARD -->
+
+    <main class="main" id="dashboard">
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <div>
+                <h1>Helpdesk Operations Center</h1>
+
+                <p class="muted">
+                    FredDesk V2.1 |
+                    Windows Diagnostics & Incident Management
+                </p>
+            </div>
+
+            <form
+                action="{{ url_for('dashboard') }}"
+                method="GET"
+            >
+                <button
+                    type="submit"
+                    class="refresh-button"
+                >
+                    Refresh Diagnostics
+                </button>
+            </form>
+
+        </div>
+
+
+        <!-- SYSTEM MESSAGES -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- OVERALL HEALTH SCORE -->
+
+        <section class="card" id="system-health">
+
+            <h2>Overall Health Score</h2>
+
+            <div class="score">
+                {{ health_score }}/100
+            </div>
+
+        </section>
+
+
+        <!-- SYSTEM RESOURCE MONITORING -->
+
+        <div class="grid">
+
+            <div class="card">
+
+                <h3>CPU Utilization</h3>
+
+                <div class="metric">
+                    {{ health.cpu_percent }}%
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>Memory Utilization</h3>
+
+                <div class="metric">
+                    {{ health.memory_percent }}%
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>Disk Utilization</h3>
+
+                <div class="metric">
+                    {{ health.disk_percent }}%
+                </div>
+
+                <p>
+                    {{ health.disk_free_gb }} GB Free
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- SYSTEM INFORMATION -->
+
+        <section class="card">
+
+            <h2>System Information</h2>
+
+            <p>
+                <strong>Hostname:</strong>
+                {{ health.hostname }}
+            </p>
+
+            <p>
+                <strong>IP Address:</strong>
+                {{ health.ip_address }}
+            </p>
+
+            <p>
+                <strong>Operating System:</strong>
+                {{ health.os }}
+            </p>
+
+            <p>
+                <strong>System Uptime:</strong>
+                {{ health.uptime }}
+            </p>
+
+            <p>
+                <strong>Last Scan:</strong>
+                {{ health.scan_time }}
+            </p>
+
+        </section>
+
+
+        <!-- TOP PROCESSES -->
+
+        <section class="card" id="processes">
+
+            <h2>Top Processes</h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>PID</th>
+                            <th>CPU %</th>
+                            <th>Memory MB</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for proc in top_processes %}
+
+                            <tr>
+
+                                <td>{{ proc.name }}</td>
+
+                                <td>{{ proc.pid }}</td>
+
+                                <td>{{ proc.cpu_percent }}</td>
+
+                                <td>{{ proc.memory_mb }}</td>
+
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="4">
+                                    No process data available.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- PROCESS ANALYSIS -->
+
+            <h3>Process Analysis</h3>
+
+            {% for alert in process_alerts %}
+
+                <p>{{ alert }}</p>
+
+            {% else %}
+
+                <p>No process analysis available.</p>
+
+            {% endfor %}
+
+        </section>
+
+
+        <!-- WINDOWS EVENT LOG ANALYSIS -->
+
+        <section class="card" id="windows-logs">
+
+            <h2>Windows Event Log Analysis</h2>
+
+            <div class="grid">
+
+                <div>
+
+                    <p>
+                        <strong>Failed Logins:</strong>
+                        {{ logs.failed_logins }}
+                    </p>
+
+                    <p>
+                        <strong>Account Lockouts:</strong>
+                        {{ logs.account_lockouts }}
+                    </p>
+
+                    <p>
+                        <strong>Unexpected Shutdowns:</strong>
+                        {{ logs.unexpected_shutdowns }}
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <p>
+                        <strong>Service Crashes:</strong>
+                        {{ logs.service_crashes }}
+                    </p>
+
+                    <p>
+                        <strong>Application Errors:</strong>
+                        {{ logs.application_errors }}
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <p>
+                        <strong>Critical Errors:</strong>
+                        {{ logs.critical_errors }}
+                    </p>
+
+                    <p>
+                        <strong>Warnings:</strong>
+                        {{ logs.warnings }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TECHNICIAN RECOMMENDATIONS -->
+
+        <section class="card" id="recommendations">
+
+            <h2>Technician Recommendations</h2>
+
+            {% for issue in issues %}
+
+                <p>{{ issue }}</p>
+
+            {% else %}
+
+                <p>No system recommendations available.</p>
+
+            {% endfor %}
+
+
+            {% for recommendation in logs.recommendations %}
+
+                <p>{{ recommendation }}</p>
+
+            {% endfor %}
+
+        </section>
+
+
+        <!-- INCIDENT MANAGEMENT -->
+
+        <section class="card" id="incidents">
+
+            <h2>Incident Management</h2>
+
+            <p class="muted">
+                Monitor, investigate, document, and resolve
+                system incidents.
+            </p>
+
+
+            <!-- TICKET STATISTICS -->
+
+            <div class="grid">
+
+                <div class="card">
+
+                    <h3>Open / In Progress</h3>
+
+                    <div class="metric">
+                        {{ open_count }}
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Resolved</h3>
+
+                    <div class="metric">
+                        {{ resolved_count }}
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>Total Tickets</h3>
+
+                    <div class="metric">
+                        {{ tickets | length }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- INCIDENT HISTORY -->
+
+            <h3 class="section-title">
+                Incident History
+            </h3>
+
+
+            {% if tickets %}
+
+                {% for ticket in tickets %}
+
+                    <article class="ticket">
+
+                        <!-- TICKET HEADER -->
+
+                        <div class="ticket-header">
+
+                            <h3>
+
+                                <span class="ticket-id">
+                                    {{ ticket.ticket_id }}
+                                </span>
+
+                                — {{ ticket.title }}
+
+                            </h3>
+
+
+                            <span
+                                class="badge {{ ticket.status | lower | replace(' ', '-') }}"
+                            >
+                                {{ ticket.status }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- TICKET INFORMATION -->
+
+                        <div class="ticket-details">
+
+                            <p>
+                                <strong>Priority:</strong>
+                                {{ ticket.priority }}
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{ ticket.category }}
+                            </p>
+
+                            <p>
+                                <strong>Source:</strong>
+                                {{ ticket.source }}
+                            </p>
+
+                            <p>
+                                <strong>Created:</strong>
+                                {{ ticket.created_at }}
+                            </p>
+
+                        </div>
+
+
+                        <!-- INCIDENT DESCRIPTION -->
+
+                        <h4>Incident Description</h4>
+
+                        <p>
+                            {{ ticket.description }}
+                        </p>
+
+
+                        <!-- DIAGNOSTIC EVIDENCE -->
+
+                        <div class="evidence">
+
+                            <h4>Diagnostic Evidence</h4>
+
+                            {% if ticket.evidence %}
+
+                                <ul>
+
+                                    {% for item in ticket.evidence %}
+
+                                        <li>{{ item }}</li>
+
+                                    {% endfor %}
+
+                                </ul>
+
+                            {% else %}
+
+                                <p>
+                                    No diagnostic evidence recorded.
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- OPEN INCIDENT RESOLUTION -->
+
+                        {% if ticket.status in ['Open', 'In Progress'] %}
+
+                            <form
+                                action="{{ url_for('resolve_incident', ticket_id=ticket.ticket_id) }}"
+                                method="POST"
+                            >
+
+                                <label for="resolution-{{ ticket.id }}">
+
+                                    <strong>
+                                        Technician Resolution Notes
+                                    </strong>
+
+                                </label>
+
+
+                                <p class="muted">
+
+                                    Document the investigation,
+                                    corrective action, and
+                                    verification performed.
+
+                                </p>
+
+
+                                <textarea
+                                    id="resolution-{{ ticket.id }}"
+                                    name="resolution"
+                                    placeholder="Describe the troubleshooting performed, corrective action taken, and how the resolution was verified."
+                                    required
+                                ></textarea>
+
+
+                                <button type="submit">
+                                    Mark Resolved
+                                </button>
+
+                            </form>
+
+
+                        <!-- RESOLVED INCIDENT -->
+
+                        {% elif ticket.status == 'Resolved' %}
+
+                            <div class="resolution">
+
+                                <h4>Resolution Recorded</h4>
+
+                                <p>
+                                    {{ ticket.resolution or 'No resolution details recorded.' }}
+                                </p>
+
+                            </div>
+
+
+                        <!-- CLOSED OR OTHER STATUS -->
+
+                        {% else %}
+
+                            <p class="muted">
+                                This ticket is not currently editable.
+                            </p>
+
+                            {% if ticket.resolution %}
+
+                                <div class="resolution">
+
+                                    <h4>Recorded Resolution</h4>
+
+                                    <p>
+                                        {{ ticket.resolution }}
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    </article>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <h3>No Incidents Recorded</h3>
+
+                    <p>
+                        FredDesk has not recorded any incidents yet.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
