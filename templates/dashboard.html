@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FredDesk OPS</title>
+    <meta http-equiv="refresh" content="5">
+    <style>
+        body { margin: 0; font-family: Arial; background: #111827; color: white; display: flex; }
+        .sidebar { width: 230px; min-height: 100vh; background: #020617; padding: 25px; }
+        .sidebar h2 { color: #38bdf8; }
+        .sidebar p { color: #94a3b8; margin: 18px 0; }
+        .main { flex: 1; padding: 30px; }
+        .card { background: #1f2937; padding: 20px; margin-bottom: 18px; border-radius: 12px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #374151; text-align: left; }
+        .score { font-size: 48px; color: #38bdf8; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>FredDesk OPS</h2>
+    <p>Dashboard</p><p>System Health</p><p>Processes</p><p>Windows Logs</p><p>Network</p><p>Reports</p>
+</div>
+<div class="main">
+    <h1>Helpdesk Operations Center</h1>
+    <div class="card"><h2>Overall Health Score</h2><div class="score">{{ health_score }}/100</div></div>
+    <div class="grid">
+        <div class="card"><h3>CPU</h3><h2>{{ health.cpu_percent }}%</h2></div>
+        <div class="card"><h3>Memory</h3><h2>{{ health.memory_percent }}%</h2></div>
+        <div class="card"><h3>Disk</h3><h2>{{ health.disk_percent }}%</h2><p>{{ health.disk_free_gb }} GB free</p></div>
+    </div>
+    <div class="card">
+        <h2>System Info</h2>
+        <p><strong>Hostname:</strong> {{ health.hostname }}</p>
+        <p><strong>IP Address:</strong> {{ health.ip_address }}</p>
+        <p><strong>OS:</strong> {{ health.os }}</p>
+        <p><strong>Uptime:</strong> {{ health.uptime }}</p>
+        <p><strong>Last Scan:</strong> {{ health.scan_time }}</p>
+    </div>
+    <div class="card">
+        <h2>Top Processes</h2>
+        <table>
+            <tr><th>Process</th><th>PID</th><th>CPU %</th><th>Memory MB</th></tr>
+            {% for proc in top_processes %}
+            <tr><td>{{ proc.name }}</td><td>{{ proc.pid }}</td><td>{{ proc.cpu_percent }}</td><td>{{ proc.memory_mb }}</td></tr>
+            {% endfor %}
+        </table>
+        <h3>Process Analysis</h3>
+        {% for alert in process_alerts %}<p>• {{ alert }}</p>{% endfor %}
+    </div>
+    <div class="card">
+        <h2>Windows Event Logs</h2>
+        <p><strong>Failed Logins:</strong> {{ logs.failed_logins }}</p>
+        <p><strong>Account Lockouts:</strong> {{ logs.account_lockouts }}</p>
+        <p><strong>Unexpected Shutdowns:</strong> {{ logs.unexpected_shutdowns }}</p>
+        <p><strong>Service Crashes:</strong> {{ logs.service_crashes }}</p>
+        <p><strong>Application Errors:</strong> {{ logs.application_errors }}</p>
+        <p><strong>Critical Errors:</strong> {{ logs.critical_errors }}</p>
+        <p><strong>Warnings:</strong> {{ logs.warnings }}</p>
+    </div>
+    <div class="card">
+        <h2>Technician Recommendations</h2>
+        {% for issue in issues %}<p>• {{ issue }}</p>{% endfor %}
+        {% for rec in logs.recommendations %}<p>• {{ rec }}</p>{% endfor %}
+    </div>
+    <div class="card">
+        <h2>Incidents / Tickets</h2>
+        {% if tickets %}
+            {% for ticket in tickets %}
+                <div>
+                    <h3>{{ ticket.ticket_id }} — {{ ticket.title }}</h3>
+                    <p><strong>Status:</strong> {{ ticket.status }}</p>
+                    <p><strong>Priority:</strong> {{ ticket.priority }}</p>
+                    <p><strong>Category:</strong> {{ ticket.category }}</p>
+                    <p><strong>Source:</strong> {{ ticket.source }}</p>
+                    <p>{{ ticket.description }}</p>
+                    <strong>Evidence:</strong>
+                    <ul>{% for item in ticket.evidence %}<li>{{ item }}</li>{% endfor %}</ul>
+                    <p><strong>Created:</strong> {{ ticket.created_at }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No open incidents detected.</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
